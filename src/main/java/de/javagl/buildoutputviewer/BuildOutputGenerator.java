@@ -88,6 +88,12 @@ class BuildOutputGenerator
     private static final String COMPILER_ERROR_NOTE = ": error C";
     
     /**
+     * The string that appears in a line payload and indicates 
+     * that a fatal compiler error was generated
+     */
+    private static final String COMPILER_FATAL_ERROR_NOTE = ": fatal error C";
+    
+    /**
      * The prefix of the payload of a line that indicates 
      * a linker error
      */
@@ -315,6 +321,22 @@ class BuildOutputGenerator
             }
             return;
         }
+        
+        // Check for the infixes that indicate compiler errors
+        int fatalErrorNoteIndex = 
+            linePayload.indexOf(COMPILER_FATAL_ERROR_NOTE); 
+        if (fatalErrorNoteIndex != -1)
+        {
+            CompilerMessage compilerMessage = 
+                processCompilerMessage(linePayload);
+            previousBuildMessage = compilerMessage;
+            if (compilerMessage != null)
+            {
+                buildOutput.addCompilerError(compilerMessage);
+            }
+            return;
+        }
+        
         
         // Check for the infixes that indicate linker warnings
         if (linePayload.startsWith(LINKER_WARNING_NOTE_PREFIX))
